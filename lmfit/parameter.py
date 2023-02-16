@@ -319,6 +319,43 @@ class Parameters(dict):
         """Return a HTML representation of parameters data."""
         return params_html_table(self)
 
+    def set(self, **kws):
+        """Set Parameter values and attributes
+
+        Parameters
+        ----------
+        keyword_args : keywords are parameter names, value are
+                       dicts of Parameter values and attributes
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        1. keywords arguments will be used to create parameter names,
+        2. values can either be numbers (floats or ints) to set the parameter
+           value, or can be dictionaries with any of the following keywords:
+                value, vary, min, max, expr, brute_step
+           to set those parameter attributes
+
+        Examples
+        --------
+        >>> params = Parameters()
+        >>> params.add('xvar', value=0.50, min=0, max=1)
+        >>> params.add('yvar', expr='1.0 - xvar')
+        >>> params.set(xvar=0.80, zvar={'value':3, 'min':0})
+        """
+        for name, val in kws.items():
+            if name not in self:
+                self.__setitem__(name, Parameter(value=-inf, name=name,
+                                                 vary=True, min=-inf, max=inf,
+                                                 expr=None, brute_step=None))
+            par = self.__getitem__(name)
+            if isinstance(val, (float, int)):
+                val = {'value': val}
+            par.set(**val)
+
     def add(self, name, value=None, vary=True, min=-inf, max=inf, expr=None,
             brute_step=None):
         """Add a Parameter.
@@ -982,3 +1019,34 @@ class Parameter:
     def __rsub__(self, other):
         """- (right)"""
         return other - self._getval()
+
+
+def create_params(**kws):
+    """create lmfit Parameters, setting initial values and attributes
+
+    Parameters
+    ----------
+    keyword_args : keywords are parameter names, value are
+                   dicts of Parameter values and attributes
+
+    Returns
+    -------
+    Parameters instance
+
+    Notes
+    -----
+    1. keywords arguments will be used to create parameter names,
+    2. values can either be numbers (floats or ints) to set the parameter
+       value, or can be dictionaries with any of the following keywords:
+           value, vary, min, max, expr, brute_step
+       to set those parameter attributes
+
+    Examples
+    --------
+    >>> params = create_params(amplitude=2, center=200,
+                               sigma={'value': 3, 'min':0},
+                               fwhm={'expr': '2.0*sigma'})
+    """
+    params = Parameters()
+    params.set(**kws)
+    return params
