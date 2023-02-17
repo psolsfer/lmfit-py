@@ -551,17 +551,23 @@ class Model:
 
     def set_param_hint(self, name, **kwargs):
         """Set *hints* to use when creating parameters with `make_params()`.
-
-        This is especially convenient for setting initial values. The
-        `name` can include the models `prefix` or not. The hint given can
-        also include optional bounds and constraints
+        The hint given can include optional bounds and constraints
         ``(value, vary, min, max, expr)``, which will be used by
-        `make_params()` when building default parameters.
+        `Model.make_params()` when building default parameters.
+
+        While this can be used to set initial values, `Model.make_params` or
+        the function `create_params` should be preferred for creating
+        parameters with initial values.
+
+        The intended use here is control how a Model should create parameters,
+        such as setting bounds that are required by the mathematics of the
+        model (for example, that a width cannot be negative), or to define
+        common constrating parameters.
 
         Parameters
         ----------
         name : str
-            Parameter name.
+            Parameter name, cnan include the models `prefix` or not.
         **kwargs : optional
             Arbitrary keyword arguments, needs to be a Parameter attribute.
             Can be any of the following:
@@ -630,7 +636,8 @@ class Model:
         verbose : bool, optional
             Whether to print out messages (default is False).
         **kwargs : optional
-            Parameter names and initial values.
+            Parameter names and initial values or dicts of
+                 values and attributes
 
         Returns
         ---------
@@ -639,11 +646,13 @@ class Model:
 
         Notes
         -----
-        1. The parameters may or may not have decent initial values for
-        each parameter.
+        1. Parameter values can be numbers (floats or ints) to set the parameter
+           value, or can be dictionaries with any of the following keywords:
+                value, vary, min, max, expr, brute_step
+           to set those parameter attributes
 
-        2. This applies any default values or parameter hints that may
-        have been set.
+        2. This method will also apply any default values or parameter hints
+           that may have been set for the model.
 
         """
         params = Parameters()
@@ -697,7 +706,10 @@ class Model:
                 if item in hint:
                     setattr(par, item, hint[item])
             if basename in kwargs:
-                par.value = kwargs[basename]
+                val = kwargs[basename]
+                if isinstance(val, (float, int)):
+                    val = {'value': val}
+                par.set(**val)
             # Add the new parameter to self._param_names
             if name not in self._param_names:
                 self._param_names.append(name)
