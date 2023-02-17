@@ -1,8 +1,13 @@
 # <examples/doc_model_loadmodel.py>
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 
 from lmfit.model import load_model
+
+if not os.path.exists('sinemodel.sav'):
+    import doc_model_savemodel  # noqa: F401
 
 
 def mysine(x, amp, freq, shift):
@@ -14,10 +19,9 @@ x = data[:, 0]
 y = data[:, 1]
 
 model = load_model('sinemodel.sav', funcdefs={'mysine': mysine})
-params = model.make_params(amp=3, freq=0.52, shift=0)
-params['shift'].max = 1
-params['shift'].min = -1
-params['amp'].min = 0.0
+params = model.make_params(amp=dict(value=3, min=0),
+                           freq=0.52,
+                           shift=dict(value=0, min=-1, max=1))
 
 result = model.fit(y, params, x=x)
 print(result.fit_report())
