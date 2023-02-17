@@ -657,6 +657,11 @@ class Model:
         """
         params = Parameters()
 
+        def setpar(par, val):
+            if isinstance(val, (float, int)):
+                val = {'value': val}
+            par.set(**val)
+
         # make sure that all named parameters are in params
         for name in self.param_names:
             if name in params:
@@ -680,11 +685,9 @@ class Model:
                         setattr(par, item, hint[item])
             # apply values passed in through kw args
             if basename in kwargs:
-                # kw parameter names with no prefix
-                par.value = kwargs[basename]
+                setpar(par, kwargs[basename])
             if name in kwargs:
-                # kw parameter names with prefix
-                par.value = kwargs[name]
+                setpar(par, kwargs[basename])
             params.add(par)
             if verbose:
                 print(f' - Adding parameter "{name}"')
@@ -706,10 +709,7 @@ class Model:
                 if item in hint:
                     setattr(par, item, hint[item])
             if basename in kwargs:
-                val = kwargs[basename]
-                if isinstance(val, (float, int)):
-                    val = {'value': val}
-                par.set(**val)
+                setpar(par, kwargs[basename])
             # Add the new parameter to self._param_names
             if name not in self._param_names:
                 self._param_names.append(name)
