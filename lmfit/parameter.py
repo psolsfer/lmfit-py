@@ -324,8 +324,9 @@ class Parameters(dict):
 
         Parameters
         ----------
-        keyword_args : keywords are parameter names, value are
-                       dicts of Parameter values and attributes
+        **kws : optional
+            Parameter names and initial values or dicts of
+                 values and attributes
 
         Returns
         -------
