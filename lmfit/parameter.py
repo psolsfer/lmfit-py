@@ -337,8 +337,10 @@ class Parameters(dict):
         1. keywords arguments will be used to create parameter names,
         2. values can either be numbers (floats or ints) to set the parameter
            value, or can be dictionaries with any of the following keywords:
-                value, vary, min, max, expr, brute_step
-           to set those parameter attributes
+                value, vary, min, max, expr, brute_step, is_init_value
+           to set those parameter attributes.
+        3. for each parameter,  ``is_init_value`` controls whether to set
+           ``init_value`` when setting ``value``, and defaults to True.
 
         Examples
         --------
@@ -355,6 +357,8 @@ class Parameters(dict):
             par = self.__getitem__(name)
             if isinstance(val, (float, int)):
                 val = {'value': val}
+            if 'is_init_value' not in val:
+                val['is_init_value'] = True
             par.set(**val)
 
     def add(self, name, value=None, vary=True, min=-inf, max=inf, expr=None,
@@ -641,7 +645,7 @@ class Parameter:
         self._init_bounds()
 
     def set(self, value=None, vary=None, min=None, max=None, expr=None,
-            brute_step=None):
+            brute_step=None, is_init_value=True):
         """Set or update Parameter attributes.
 
         Parameters
@@ -662,7 +666,8 @@ class Parameter:
         brute_step : float, optional
             Step size for grid points in the `brute` method. To remove the
             step size you must use ``0``.
-
+        is_init_value: bool, optional
+            whether to set value as `init_value`, when setting value.
         Notes
         -----
         Each argument to `set()` has a default value of None, which will
@@ -702,7 +707,10 @@ class Parameter:
         # need to set this after min and max, so that it will use new
         # bounds in the setter for value
         if value is not None:
+            is_init_value = is_init_value or self.value in (None, -inf, inf)
             self.value = value
+            if is_init_value:
+                self.init_value = value
             self.__set_expression("")
 
         if expr is not None:
