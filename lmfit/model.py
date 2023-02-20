@@ -19,6 +19,7 @@ from .confidence import conf_interval
 from .jsonutils import HAS_DILL, decode4js, encode4js
 from .minimizer import MinimizerResult
 from .printfuncs import ci_report, fit_report, fitreport_html_table
+from .version import version_tuple
 
 tiny = 1.e-15
 
@@ -197,6 +198,8 @@ class Model:
     _invalid_ivar = "Invalid independent variable name ('%s') for function %s"
     _invalid_par = "Invalid parameter name ('%s') for function %s"
     _invalid_hint = "unknown parameter hint '%s' for param '%s'"
+    _invalid_hint = "unknown parameter hint '%s' for param '%s'"
+    _overwrite_param = "overwriting value for '%s' in params. This will raise a ValueError in 1.3"
     _hint_names = ('value', 'vary', 'min', 'max', 'expr')
     valid_forms = ()
 
@@ -567,7 +570,7 @@ class Model:
         Parameters
         ----------
         name : str
-            Parameter name, cnan include the models `prefix` or not.
+            Parameter name, can include the models `prefix` or not.
         **kwargs : optional
             Arbitrary keyword arguments, needs to be a Parameter attribute.
             Can be any of the following:
@@ -589,10 +592,8 @@ class Model:
 
         Example
         --------
-
         >>> model = GaussianModel()
         >>> model.set_param_hint('sigma', min=0)
-
         """
         npref = len(self._prefix)
         if npref > 0 and name.startswith(self._prefix):
@@ -647,12 +648,19 @@ class Model:
         Notes
         -----
         1. Parameter values can be numbers (floats or ints) to set the parameter
-           value, or can be dictionaries with any of the following keywords:
-                value, vary, min, max, expr, brute_step
-           to set those parameter attributes
+           value, or dictionaries with any of the following keywords:
+           ``value``, ``vary``, ``min``, ``max``, ``expr``, ``brute_step``, ``is_init_value``
+           to set those parameter attributes.
 
         2. This method will also apply any default values or parameter hints
-           that may have been set for the model.
+           that may have been defined for the model.
+
+        Example
+        --------
+        >>> gmodel = GaussianModel(prefix='peak_') + LinearModel(prefix='bkg_')
+        >>> gmodel.make_params(peak_center=3200, bkg_offset=0, bkg_slope=0,
+        ...                    peak_amplitdue=dict(value=100, min=2),
+        ...                    peak_sigma=dict(value=25, min=0, max=1000))
 
         """
         params = Parameters()
@@ -807,7 +815,8 @@ class Model:
         return name
 
     def make_funcargs(self, params=None, kwargs=None, strip=True):
-        """Convert parameter values and keywords to function arguments."""
+        """Convert parameter values and keywords to function arguments.
+        """
         if params is None:
             params = {}
         if kwargs is None:
@@ -831,14 +840,22 @@ class Model:
                     if name in self._func_allargs or self._func_haskeywords:
                         out[name] = params[fullname].value
 
-        # 3. kwargs handled slightly differently -- may set param value too!
+        # 3. kwargs handled slightly differently:
+        #     currently, this may set param value too, but that is deprecated
+        #     and will raise a ValueError in version 1.3
         for name, val in kwargs.items():
             if strip:
                 name = self._strip_prefix(name)
             if name in self._func_allargs or self._func_haskeywords:
                 out[name] = val
                 if name in params:
-                    params[name].value = val
+                    if version_tuple[0] == 1 and version_tuple[1] > 2:
+                        msg = ("cannot pass in keyword argument for parameter "
+                               f"`{name}` that is also in the passed in `params`")
+                        raise ValueError(msg)
+                    else:
+                        warnings.warn(self._overwrite_param % (name))
+                        params[name].value = val
         return out
 
     def _make_all_args(self, params=None, **kwargs):
@@ -866,9 +883,8 @@ class Model:
         Notes
         -----
         1. if `params` is None, the values for all parameters are expected
-        to be provided as keyword arguments. If `params` is given, and a
-        keyword argument for a parameter value is also given, the keyword
-        argument will be used.
+        to be provided as keyword arguments. Mixing `params` and
+        keyword arguments is deprecated (see note 4).
 
         2. all non-parameter arguments for the model function, **including
         all the independent variables** will need to be passed in using
@@ -879,6 +895,10 @@ class Model:
         `ConstantModel` and `ComplexConstantModel`, which return a `float`/`int`
         or `complex` value.
 
+        4. If `params` is given, and a keyword argument for a parameter value
+        is also given, the keyword argument will be used and will overwrite
+        the corresponding value in the passed in `params`.  This is deprecated
+        and will generate a warning, and will raise a ValueError in version 1.3.
         """
         return self.func(**self.make_funcargs(params, kwargs))
 
@@ -956,17 +976,15 @@ class Model:
         Notes
         -----
         1. if `params` is None, the values for all parameters are expected
-        to be provided as keyword arguments. If `params` is given, and a
-        keyword argument for a parameter value is also given, the keyword
-        argument will be used.
+        to be provided as keyword arguments. Mixing `params` and
+        keyword arguments is deprecated (see `Model.eval`).
 
         2. all non-parameter arguments for the model function, **including
         all the independent variables** will need to be passed in using
         keyword arguments.
 
-        3. Parameters (however passed in), are copied on input, so the
-        original Parameter objects are unchanged, and the updated values
-        are in the returned `ModelResult`.
+        3. Parameters are copied on input, so that the original Parameter objects
+        are unchanged, and the updated values are in the returned `ModelResult`.
 
         Examples
         --------
@@ -978,10 +996,6 @@ class Model:
         Or, for more control, pass a Parameters object.
 
         >>> result = my_model.fit(data, params, t=t)
-
-        Keyword arguments override Parameters.
-
-        >>> result = my_model.fit(data, params, tau=5, t=t)
 
         """
         if params is None:
