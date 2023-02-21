@@ -58,7 +58,7 @@ The :class:`Parameter` class
 
 
 The :class:`Parameters` class
-=============================
+================================
 
 .. autoclass:: Parameters
 
@@ -91,8 +91,14 @@ The :class:`Parameters` class
    :ref:`model_saveload_sec` for further discussion.
 
 
+The :func:`create_params` function
+======================================
+
+.. autofunction:: create_params
+
+
 Simple Example
-==============
+===============
 
 A basic example making use of :class:`~lmfit.parameter.Parameters` and the
 :func:`~lmfit.minimizer.minimize` function (discussed in the next chapter)

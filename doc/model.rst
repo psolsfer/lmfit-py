@@ -512,7 +512,6 @@ Because less error checking is done, :meth:`Model.make_params` should probably
 be preferred when using Models.
 
 
-
 Initializing parameter values for a model with keyword arguments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
