@@ -19,7 +19,6 @@ from .confidence import conf_interval
 from .jsonutils import HAS_DILL, decode4js, encode4js
 from .minimizer import MinimizerResult
 from .printfuncs import ci_report, fit_report, fitreport_html_table
-from .version import version_tuple
 
 tiny = 1.e-15
 
@@ -199,7 +198,6 @@ class Model:
     _invalid_par = "Invalid parameter name ('%s') for function %s"
     _invalid_hint = "unknown parameter hint '%s' for param '%s'"
     _invalid_hint = "unknown parameter hint '%s' for param '%s'"
-    _overwrite_param = "overwriting value for '%s' in params. This will raise a ValueError in 1.3"
     _hint_names = ('value', 'vary', 'min', 'max', 'expr')
     valid_forms = ()
 
@@ -824,6 +822,16 @@ class Model:
         out = {}
         out.update(self.opts)
 
+        saved_values = {}
+        for name, val in kwargs.items():
+            if strip:
+                name = self._strip_prefix(name)
+            if name in self._func_allargs or self._func_haskeywords:
+                out[name] = val
+                if name in params:
+                    saved_values[name] = params[name].value
+                    params[name].value = val
+
         # 1. fill in in all parameter values
         for name, par in params.items():
             if strip:
@@ -840,22 +848,10 @@ class Model:
                     if name in self._func_allargs or self._func_haskeywords:
                         out[name] = params[fullname].value
 
-        # 3. kwargs handled slightly differently:
-        #     currently, this may set param value too, but that is deprecated
-        #     and will raise a ValueError in version 1.3
-        for name, val in kwargs.items():
-            if strip:
-                name = self._strip_prefix(name)
-            if name in self._func_allargs or self._func_haskeywords:
-                out[name] = val
-                if name in params:
-                    if version_tuple[0] == 1 and version_tuple[1] > 2:
-                        msg = ("cannot pass in keyword argument for parameter "
-                               f"`{name}` that is also in the passed in `params`")
-                        raise ValueError(msg)
-                    else:
-                        warnings.warn(self._overwrite_param % (name))
-                        params[name].value = val
+        # reset any values that have overwritten parameter values
+        for name, val in saved_values.items():
+            params[name].value = val
+
         return out
 
     def _make_all_args(self, params=None, **kwargs):
