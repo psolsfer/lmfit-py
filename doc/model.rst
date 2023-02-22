@@ -427,21 +427,30 @@ You would refer to these parameters as ``f1_amplitude`` and so forth, and
 the model will know to map these to the ``amplitude`` argument of ``myfunc``.
 
 
-Initializing model parameters
------------------------------
+Initializing model parameter values
+------------------------------------
 
-As mentioned above, creating a model does not create corresponding
-:class:`~lmfit.parameter.Parameters`.  The :meth:`Model.make_params` method can
-be used to create these.
-generally created with invalid initial values of ``-Inf``. That is, parameter
-values **must** be initialized in order for the model to evaluate a finite
-result or used in a fit. There are a few different ways to do this:
+As mentioned above, creating a model does not automatically create the
+corresponding :class:`~lmfit.parameter.Parameters`.  These can be created with
+either the :func:`create_params`, or the :meth:`Model.make_params` method.
+
+When creating Parameters, each parameter is created with invalid initial value
+of ``-Inf`` if it is not set explicitly. That is to say, parameter values
+**must** be initialized in order for the model to evaluate a finite result or
+used in a fit. There are a few different ways to do this:
 
   1. You can supply initial values in the definition of the model function.
   2. You can initialize the parameters when creating parameters with :meth:`Model.make_params`.
-  3. You can create a Parameters object with :class:`Parameters` or :func:`make_params`.
+  3. You can create a Parameters object with :class:`Parameters` or :func:`create_params`.
   4. You can supply initial values for the parameters when calling
      :meth:`Model.eval` or :meth:`Model.fit` methods.
+
+
+Generally, using the :meth:`Model.make_params` method is recommended. These
+methods can be mixed, allowing you to overwrite initial values at any point in
+the process of defining and using the model.
+
+
 
 
 Initializing values in the function definition
