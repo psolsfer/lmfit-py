@@ -822,15 +822,16 @@ class Model:
         out = {}
         out.update(self.opts)
 
+        # 0: if a keyword argument is going to overwrite a parameter,
+        #    save that value so it can be restored before returning
         saved_values = {}
         for name, val in kwargs.items():
-            if strip:
-                name = self._strip_prefix(name)
-            if name in self._func_allargs or self._func_haskeywords:
-                out[name] = val
-                if name in params:
-                    saved_values[name] = params[name].value
-                    params[name].value = val
+            if name in params:
+                saved_values[name] = params[name].value
+                params[name].value = val
+
+        if len(saved_values) > 0:
+            params.update_constraints()
 
         # 1. fill in in all parameter values
         for name, par in params.items():
@@ -848,10 +849,16 @@ class Model:
                     if name in self._func_allargs or self._func_haskeywords:
                         out[name] = params[fullname].value
 
-        # reset any values that have overwritten parameter values
+        # 3. kwargs might directly update function arguments
+        for name, val in kwargs.items():
+            if strip:
+                name = self._strip_prefix(name)
+            if name in self._func_allargs or self._func_haskeywords:
+                out[name] = val
+
+        # 4. finally, reset any values that have overwritten parameter values
         for name, val in saved_values.items():
             params[name].value = val
-
         return out
 
     def _make_all_args(self, params=None, **kwargs):
@@ -879,22 +886,19 @@ class Model:
         Notes
         -----
         1. if `params` is None, the values for all parameters are expected
-        to be provided as keyword arguments. Mixing `params` and
-        keyword arguments is deprecated (see note 4).
+        to be provided as keyword arguments.
 
-        2. all non-parameter arguments for the model function, **including
+        2. If `params` is given, and a keyword argument for a parameter value
+        is also given, the keyword argument will be used in place of the value
+        in the value in `params`.
+
+        3. all non-parameter arguments for the model function, **including
         all the independent variables** will need to be passed in using
         keyword arguments.
 
-        3. The return type depends on the model function. For many of the
-        built-models it is a `numpy.ndarray`, with the exception of
-        `ConstantModel` and `ComplexConstantModel`, which return a `float`/`int`
-        or `complex` value.
-
-        4. If `params` is given, and a keyword argument for a parameter value
-        is also given, the keyword argument will be used and will overwrite
-        the corresponding value in the passed in `params`.  This is deprecated
-        and will generate a warning, and will raise a ValueError in version 1.3.
+        4. The return types are generally `numpy.ndarray`, but may depends on
+        the model function and input independent variables.  That is, return
+        values may be Python `float`, `int`, or  `complex` values.
         """
         return self.func(**self.make_funcargs(params, kwargs))
 
