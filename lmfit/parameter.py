@@ -91,7 +91,7 @@ class Parameters(dict):
         _pars = self.__class__()
 
         # find the symbols that were added by users, not during construction
-        unique_symbols = {key: self._asteval.symtable[key]
+        unique_symbols = {key: deepcopy(self._asteval.symtable[key])
                           for key in self._asteval.user_defined_symbols()}
         _pars._asteval.symtable.update(unique_symbols)
 
@@ -106,7 +106,7 @@ class Parameters(dict):
                 param.vary = par.vary
                 param.brute_step = par.brute_step
                 param.stderr = par.stderr
-                param.correl = par.correl
+                param.correl = deepcopy(par.correl)
                 param.init_value = par.init_value
                 param.expr = par.expr
                 param.user_data = deepcopy(par.user_data)
