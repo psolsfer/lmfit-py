@@ -23,10 +23,12 @@ New features:
 Bug fixes/enhancements:
 
 - fix deepcopy of ``Parameters`` (mguhyo; PR #837)
-- improvve ``Model.make_params`` and ``create_params`` to take optional dict of Parameter attributes (PR #844)
+- improve ``Model.make_params`` and ``create_params`` to take optional dict of Parameter attributes (PR #844)
 - fix reporting of ``nfev`` from ``least_squares`` to better reflect actual number of function calls (PR #844)
 - fix bug in ``Model.eval`` when mixing parameters and keyword arguments (PR #844, #839)
 - re-adds ``residual`` to saved ``Model`` result (PR #844, #830)
+- ``ConstantModel`` and ``ComplexConstantModel`` will return an ndarray of the same shape as the independent variable ``x`` (JeppeKlitgaard, Issue #840; PR #841)
+- update tests for latest versions of Numpy and Scipy.
 
 .. _whatsnew_110_label:
 
