@@ -432,7 +432,8 @@ Initializing model parameter values
 
 As mentioned above, creating a model does not automatically create the
 corresponding :class:`~lmfit.parameter.Parameters`.  These can be created with
-either the :func:`create_params`, or the :meth:`Model.make_params` method.
+either the :func:`create_params` function, or the :meth:`Model.make_params`
+method of the corresponding instance of :class:`Model`.
 
 When creating Parameters, each parameter is created with invalid initial value
 of ``-Inf`` if it is not set explicitly. That is to say, parameter values
@@ -548,7 +549,7 @@ Using parameter hints
 
 After a model has been created, but prior to creating parameters with
 :meth:`Model.make_params`, you can define parameter hints for that model. This
-allow you to set other parameter attributes for bounds, whether it is varied in
+allows you to set other parameter attributes for bounds, whether it is varied in
 the fit, or set a default constraint expression for a parameter.  You can also
 set the initial value, but that is not really the intention of the method,
 which is to really to let you say that about the idealized Model, for example
@@ -570,18 +571,6 @@ Parameter hints are discussed in more detail in section
 :ref:`model_param_hints_section`.
 
 
-After a model has been created, you can give it hints for how to create
-parameters with :meth:`Model.make_params`.  This allows you to set not only a
-default initial value but also to set other parameter attributes
-controlling bounds, whether it is varied in the fit, or a constraint
-expression. To set a parameter hint, you can use :meth:`Model.set_param_hint`,
-as with:
-
-.. jupyter-execute::
-
-    mod = Model(myfunc)
-    mod.set_param_hint('a', value=1.0)
-    mod.set_param_hint('b', value=0.3, min=0, max=1.0)
 
 Parameter hints are stored in a model's :attr:`param_hints` attribute,
 which is simply a nested dictionary:
@@ -592,7 +581,7 @@ which is simply a nested dictionary:
     for pname, par in mod.param_hints.items():
         print(pname, par)
 
-You can change this dictionary directly, or with the :meth:`Model.set_param_hint`
+You can change this dictionary directly or use the :meth:`Model.set_param_hint`
 method. Either way, these parameter hints are used by :meth:`Model.make_params`
 when making parameters.
 
@@ -604,10 +593,16 @@ of:
 .. jupyter-execute::
 
     mod = Model(gaussian)
-    mod.set_param_hint('fwhm', expr='2.3548*sigma')
+    mod.set_param_hint('wid', min=0)
+    mod.set_param_hint('fwhm', expr='2.3548*wid')
+    params = mod.make_params(amp={'value': 10, 'min':0.1, 'max':2000},
+                             cen=5.5, wid=1.25)
+
+    params.pretty_print()
 
 With that definition, the value (and uncertainty) of the ``fwhm`` parameter
-will be reported in the output of any fit done with that model.
+will be reported in the output of any fit done with that model:
+
 
 .. _model_saveload_sec:
 

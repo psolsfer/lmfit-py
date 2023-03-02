@@ -100,7 +100,7 @@ including:
      a pretty opaque and complex process.
 
 While these shortcomings can be worked around with some work, they are all
-essentially due to the use of traditional arrays lists to hold the variables,
+essentially due to the use of arrays or lists to hold the variables,
 which matches closely the implementation of the underlying Fortran code, but
 does not fit very well with Python's rich selection of objects and data
 structures. The key concept in lmfit is to define and use :class:`Parameter`

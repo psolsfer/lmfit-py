@@ -563,7 +563,7 @@ class Model:
         The intended use here is control how a Model should create parameters,
         such as setting bounds that are required by the mathematics of the
         model (for example, that a width cannot be negative), or to define
-        common constrating parameters.
+        common constraints for parameters.
 
         Parameters
         ----------
@@ -976,8 +976,8 @@ class Model:
         Notes
         -----
         1. if `params` is None, the values for all parameters are expected
-        to be provided as keyword arguments. Mixing `params` and
-        keyword arguments is deprecated (see `Model.eval`).
+        to be provided as keyword arguments.
+
 
         2. all non-parameter arguments for the model function, **including
         all the independent variables** will need to be passed in using

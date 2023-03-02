@@ -334,7 +334,7 @@ class Parameters(dict):
 
         Notes
         -----
-        1. keywords arguments will be used to create parameter names,
+        1. keyword arguments will be used to create parameter names,
         2. values can either be numbers (floats or ints) to set the parameter
            value, or can be dictionaries with any of the following keywords:
            ``value``, ``vary``, ``min``, ``max``, ``expr``, ``brute_step``, ``is_init_value``
@@ -1044,7 +1044,7 @@ def create_params(**kws):
 
     Notes
     -----
-    1. keywords arguments will be used to create parameter names,
+    1. keyword arguments will be used to create parameter names,
     2. values can either be numbers (floats or ints) to set the parameter
        value, or can be dictionaries with any of the following keywords:
        ``value``, ``vary``, ``min``, ``max``, ``expr``, ``brute_step``, ``is_init_value``
