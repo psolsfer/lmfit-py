@@ -97,7 +97,7 @@ class Parameters(dict):
                 val = deepcopy(self._asteval.symtable[key])
                 unique_symbols[key] = val
             except (TypeError, ValueError):
-                pass
+                unique_symbols[key] = self._asteval.symtable[key]
 
         _pars._asteval.symtable.update(unique_symbols)
 
