@@ -91,8 +91,14 @@ class Parameters(dict):
         _pars = self.__class__()
 
         # find the symbols that were added by users, not during construction
-        unique_symbols = {key: deepcopy(self._asteval.symtable[key])
-                          for key in self._asteval.user_defined_symbols()}
+        unique_symbols = {}
+        for key in self._asteval.user_defined_symbols():
+            try:
+                val = deepcopy(self._asteval.symtable[key])
+                unique_symbols[key] = val
+            except (TypeError, ValueError):
+                pass
+
         _pars._asteval.symtable.update(unique_symbols)
 
         # we're just about to add a lot of Parameter objects to the newly
