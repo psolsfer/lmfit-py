@@ -702,6 +702,8 @@ and ``bic``.
 
 .. automethod:: ModelResult.fit_report
 
+.. automethod:: ModelResult.summary
+
 .. automethod:: ModelResult.conf_interval
 
 .. automethod:: ModelResult.ci_report
