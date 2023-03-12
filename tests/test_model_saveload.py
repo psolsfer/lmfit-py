@@ -22,7 +22,7 @@ y, x = np.loadtxt(os.path.join(os.path.dirname(__file__), '..',
 SAVE_MODEL = 'model_1.sav'
 SAVE_MODELRESULT = 'modelresult_1.sav'
 
-MODELRESULT_LMFIT_1_0 = 'gauss_modelresult_lmfit1.0.0.sav'
+MODELRESULT_LMFIT_1_0 = 'gauss_modelresult_lmfit100.sav'
 
 
 def clear_savefile(fname):
