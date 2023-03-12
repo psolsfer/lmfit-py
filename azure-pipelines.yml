@@ -95,6 +95,7 @@ stages:
           displayName: 'List installed Python packages'
         - script: |
             python -m pip install pytest-azurepipelines
+            cd tests
             pytest
           displayName: 'Run test-suite and collect coverage'
         - script: |
@@ -152,6 +153,7 @@ stages:
           displayName: 'List installed Python packages'
         - script: |
             python -m pip install pytest-azurepipelines
+            cd tests
             pytest
           displayName: 'Run test-suite and collect coverage'
         - script: |
@@ -197,6 +199,7 @@ stages:
           displayName: 'List installed Python packages'
         - script: |
             python -m pip install pytest-azurepipelines
+            cd tests
             pytest
           displayName: 'Run test-suite'
         - powershell:
@@ -232,6 +235,7 @@ stages:
           displayName: 'List installed Python packages'
         - script: |
             python -m pip install pytest-azurepipelines
+            cd tests
             pytest
           displayName: 'Run test-suite and collect coverage'
 
