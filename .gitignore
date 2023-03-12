@@ -18,7 +18,8 @@ sandbox/
 .ipynb_checkpoints/
 .vscode/
 doc/html
-*.sav
+doc/*.sav
+exmamples/*.sav
 .pytest*
 *.coverage*
 *htmlcov/*
